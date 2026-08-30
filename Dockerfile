@@ -5,7 +5,6 @@ WORKDIR /app
 
 COPY --chown=node:node package.json package-lock.json server.mjs ./
 RUN npm ci --omit=dev
-COPY --chown=node:node platform ./platform
 COPY --chown=node:node storage ./storage
 COPY --chown=node:node world ./world
 COPY --chown=node:node state ./state

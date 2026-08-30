@@ -37,6 +37,8 @@ Everything above is reconstructed from [`state/current.json`](https://github.com
 
 ## Repository is the database
 
+The deployed root contains only the selected `world/index.html`. There is no prompt form, tournament wrapper, or control dashboard in the product UI; those surfaces live here on GitHub.
+
 - `proposals/<slug>/prompt.md` is the raw user request and enters through a pull request.
 - `cycles/<cycle-id>.json` is the append-only public tournament record: design, author, agent, classifier, preview, votes, and winner.
 - `releases/<epoch-id>.json` is an immutable production record.
@@ -51,7 +53,7 @@ Use the repository's [Actions tab](https://github.com/shayliv/hello-ai-world/act
 
 1. **Agent · Build candidate from proposal PR** — takes a prompt-only PR and cycle ID, runs the builder and independent classifier, then opens a candidate PR. Requires the `OPENAI_API_KEY` repository secret.
 2. **Deploy · Candidate preview** — takes a candidate PR and deploys its exact head commit to an isolated Cloud Run service.
-3. **Deploy · Staging** — deploys the current `staging` branch as the public wrapper.
+3. **Deploy · Staging** — deploys the current `staging` branch with the selected world at its root.
 4. **Deploy · Production** — verifies an immutable release and deploys the protected `production` branch after an explicit confirmation.
 
 GCP deploys authenticate with GitHub OIDC through Workload Identity Federation; there is no service-account key in GitHub. See [OPERATIONS.md](OPERATIONS.md) for inputs and recovery checks.

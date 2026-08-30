@@ -116,9 +116,8 @@ test("proposal validation is prompt-only and bounded", async () => {
     });
     assert.equal(accepted.response.status, 201);
     assert.equal(accepted.body.proposal.prompt, "<img src=x onerror=alert(1)>");
-    const script = await (await fetch(`${app.baseUrl}/app.js`)).text();
-    assert.match(script, /\.textContent = text/);
-    assert.doesNotMatch(script, /innerHTML/);
+    const world = await (await fetch(`${app.baseUrl}/`)).text();
+    assert.doesNotMatch(world, /onerror=alert|proposal-form|Submit prompt/);
   } finally {
     await app.close();
     rmSync(directory, { recursive: true, force: true });
@@ -245,7 +244,7 @@ test("zero-vote ties select the earliest candidate and history is linear", async
   }
 });
 
-test("health and platform responses carry security headers", async () => {
+test("platform root serves only the selected world with security headers", async () => {
   const directory = mkdtempSync(join(tmpdir(), "hello-ai-world-headers-"));
   const app = await start({ databasePath: join(directory, "test.sqlite") });
   try {
@@ -255,9 +254,14 @@ test("health and platform responses carry security headers", async () => {
     assert.equal(health.headers.get("referrer-policy"), "no-referrer");
     assert.match(health.headers.get("permissions-policy"), /camera=\(\)/);
     assert.equal((await fetch(`${app.baseUrl}/api/health`)).status, 200);
-    const wrapper = await fetch(`${app.baseUrl}/`);
-    assert.match(wrapper.headers.get("content-security-policy"), /frame-ancestors 'none'/);
-    assert.match(await wrapper.text(), /sandbox="allow-scripts"/);
+    const world = await fetch(`${app.baseUrl}/`);
+    assert.match(world.headers.get("content-security-policy"), /frame-ancestors http: https:/);
+    const html = await world.text();
+    assert.match(html, /hello, ai world/);
+    assert.match(html, /languages/);
+    assert.doesNotMatch(html, /proposal-form|trusted platform|tournament/i);
+    assert.equal((await fetch(`${app.baseUrl}/app.js`)).status, 404);
+    assert.equal((await fetch(`${app.baseUrl}/styles.css`)).status, 404);
   } finally {
     await app.close();
     rmSync(directory, { recursive: true, force: true });
