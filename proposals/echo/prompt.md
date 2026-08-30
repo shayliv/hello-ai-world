@@ -1,0 +1,1 @@
+Make “hello, ai world” feel alive: every click or tap should create one restrained typographic echo that expands and fades from that point, while the central greeting remains calm. Cap the number of echoes, support keyboard activation, and honor reduced-motion. Use only self-contained HTML, CSS, and JavaScript with no network access.
