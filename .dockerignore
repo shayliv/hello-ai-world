@@ -1,0 +1,11 @@
+.git
+.codex
+.regent
+data
+node_modules
+coverage
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+server.test.mjs
+npm-debug.log

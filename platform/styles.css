@@ -1,0 +1,23 @@
+:root { color: #171717; background: #f5f4ef; font: 16px/1.5 Arial, sans-serif; }
+body { margin: 0; }
+header, main { width: min(1100px, calc(100% - 32px)); margin: 0 auto; }
+header { padding: 48px 0 20px; }
+h1 { margin: 0; font-size: clamp(2rem, 6vw, 4rem); font-weight: 500; }
+h2 { margin-top: 0; font-size: 1.2rem; }
+.eyebrow { text-transform: uppercase; letter-spacing: .14em; font-size: .75rem; }
+main { display: grid; gap: 16px; padding-bottom: 64px; }
+section { padding: 20px; border: 1px solid #ccc; background: #fff; }
+iframe { width: 100%; height: 260px; border: 1px solid #bbb; background: #fff; }
+form { display: grid; gap: 8px; }
+textarea { min-height: 96px; padding: 10px; font: inherit; }
+button { width: fit-content; padding: 8px 12px; font: inherit; cursor: pointer; }
+button:disabled { cursor: default; }
+output { min-height: 1.5em; }
+.candidate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.candidate { display: grid; gap: 10px; padding: 12px; border: 1px solid #ddd; }
+.candidate h3, .candidate p { margin: 0; }
+.candidate iframe { height: 220px; }
+.prompt { white-space: pre-wrap; }
+.metadata { color: #555; }
+.empty { color: #666; }
+li + li { margin-top: 12px; }

@@ -8,6 +8,11 @@
   },
   "scripts": {
     "start": "node server.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "validate": "node --test",
+    "validate:evolution": "node scripts/validate-evolution.mjs"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^9.0.0"
   }
 }
