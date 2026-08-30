@@ -1,0 +1,1 @@
+Turn “hello, ai world” into a quiet language portal. Each click or tap should reveal the greeting in another language with its native script and language name, while keeping the original minimal typography. Make the current greeting linkable through the URL hash. Use only self-contained HTML, CSS, and JavaScript with no network access.
