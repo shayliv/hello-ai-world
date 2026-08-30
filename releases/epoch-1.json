@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "epoch-1",
+  "title": "Languages",
+  "releasedAt": "2026-08-30T15:00:11.308355Z",
+  "commit": "1385e9af4fbfc4b7ba7d8a56f36f5c092e6edf8d",
+  "worldSha256": "4625d990302aecd587cfbfa315887778db817b21efb091c83d7cb213ce94779c",
+  "author": "shayliv",
+  "sourceCycle": "cycle-1",
+  "winner": "languages",
+  "prompt": "Turn \u201chello, ai world\u201d into a quiet language portal. Each click or tap should reveal the greeting in another language with its native script and language name, while keeping the original minimal typography. Make the current greeting linkable through the URL hash. Use only self-contained HTML, CSS, and JavaScript with no network access.",
+  "previewUrl": "https://hello-ai-world-mhbydmqmqq-ew.a.run.app/world/index.html",
+  "previewImage": "docs/previews/epoch-1.jpg",
+  "candidatePullRequest": 3,
+  "promotionPullRequest": 4,
+  "builderSession": "01a0531e-c865-7750-8055-a11358570355",
+  "classifierSession": "01a05324-748d-78f1-98c2-4c2e411865c5"
+}

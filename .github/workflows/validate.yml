@@ -22,6 +22,7 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm test
+      - run: npm run ledger:check
       - name: Enforce prompt and candidate boundaries
         if: github.event_name == 'pull_request' && (startsWith(github.head_ref, 'proposal/') || startsWith(github.head_ref, 'candidate/'))
         run: node scripts/validate-evolution.mjs --base "${{ github.event.pull_request.base.sha }}"

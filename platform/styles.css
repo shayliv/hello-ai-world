@@ -11,6 +11,7 @@ iframe { width: 100%; height: 260px; border: 1px solid #bbb; background: #fff; }
 form { display: grid; gap: 8px; }
 textarea { min-height: 96px; padding: 10px; font: inherit; }
 button { width: fit-content; padding: 8px 12px; font: inherit; cursor: pointer; }
+.vote-link { width: fit-content; padding: 8px 12px; border: 1px solid #171717; color: inherit; text-decoration: none; }
 button:disabled { cursor: default; }
 output { min-height: 1.5em; }
 .candidate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
@@ -19,5 +20,6 @@ output { min-height: 1.5em; }
 .candidate iframe { height: 220px; }
 .prompt { overflow-wrap: anywhere; white-space: pre-wrap; }
 .metadata { color: #555; font-size: .78rem; overflow-wrap: anywhere; }
+.design { color: #333; font-size: .9rem; }
 .empty { color: #666; }
 li + li { margin-top: 12px; }
