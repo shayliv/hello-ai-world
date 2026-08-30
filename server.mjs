@@ -200,7 +200,7 @@ export function createApp({
     const worldRequest = (path === "/" && mode === "candidate") || path === "/world/index.html";
     baseHeaders(response, { embeddable: worldRequest });
 
-    if (request.method === "GET" && path === "/healthz") {
+    if (request.method === "GET" && (path === "/healthz" || path === "/api/health")) {
       send(response, 200, { ok: true, mode });
       return;
     }
