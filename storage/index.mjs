@@ -1,5 +1,6 @@
 import { join } from "node:path";
 import { FirestoreTournamentStore } from "./firestore.mjs";
+import { RepositoryTournamentStore } from "./repository.mjs";
 import { SQLiteTournamentStore } from "./sqlite.mjs";
 
 export function createTournamentStore({
@@ -16,6 +17,10 @@ export function createTournamentStore({
       databaseId: process.env.FIRESTORE_DATABASE_ID,
       namespace: process.env.FIRESTORE_NAMESPACE ?? "hello-ai-world",
     });
+  }
+
+  if (backend === "repository") {
+    return new RepositoryTournamentStore();
   }
 
   throw new Error(`unsupported DATABASE_BACKEND: ${backend}`);

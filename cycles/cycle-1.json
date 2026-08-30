@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "cycle-1",
+  "label": "Cycle 1",
+  "status": "promoted",
+  "recordedAt": "2026-08-30T15:00:11.308355Z",
+  "ballot": {
+    "source": "synthetic-end-to-end-test",
+    "rule": "one signed anonymous voter cookie per cycle",
+    "totalVotes": 3,
+    "issue": null
+  },
+  "winner": "languages",
+  "classifier": {
+    "provider": "OpenAI",
+    "agent": "Codex",
+    "sessionId": "01a05324-748d-78f1-98c2-4c2e411865c5",
+    "verdict": "approved"
+  },
+  "candidates": [
+    {
+      "id": 1,
+      "slug": "orbit",
+      "design": "A restrained pointer-reactive orbit around the original greeting.",
+      "prompt": "Keep \u201chello, ai world\u201d as the entire idea, but make a tiny black dot orbit the words. Pointer movement should gently bend the orbit, clicking should briefly reverse it, and reduced-motion users should see a still, beautiful composition. Use only self-contained HTML, CSS, and JavaScript with no network access.",
+      "promptPath": "proposals/orbit/prompt.md",
+      "promptAuthor": "shayliv",
+      "promptPullRequest": null,
+      "candidatePullRequest": 2,
+      "branch": "candidate/cycle-1-orbit",
+      "commit": "f2078ce61f57b7bb0d41edcb4b2480f8f185178c",
+      "previewUrl": "https://hello-ai-world-c1-orbit-mhbydmqmqq-ew.a.run.app/",
+      "previewImage": "docs/previews/cycle-1-orbit.jpg",
+      "deployedAt": "2026-08-30T14:51:34.814433Z",
+      "votes": 1,
+      "builder": {
+        "provider": "OpenAI",
+        "agent": "Codex",
+        "sessionId": "01a0531e-c85d-7e62-b134-8ec7cac2ee6a"
+      }
+    },
+    {
+      "id": 2,
+      "slug": "languages",
+      "design": "A quiet, hash-linkable language portal with twenty native-script greetings.",
+      "prompt": "Turn \u201chello, ai world\u201d into a quiet language portal. Each click or tap should reveal the greeting in another language with its native script and language name, while keeping the original minimal typography. Make the current greeting linkable through the URL hash. Use only self-contained HTML, CSS, and JavaScript with no network access.",
+      "promptPath": "proposals/languages/prompt.md",
+      "promptAuthor": "shayliv",
+      "promptPullRequest": null,
+      "candidatePullRequest": 3,
+      "branch": "candidate/cycle-1-languages",
+      "commit": "0202452c112a86d4f8f8e875dadef7e14045c82a",
+      "previewUrl": "https://hello-ai-world-c1-languages-mhbydmqmqq-ew.a.run.app/",
+      "previewImage": "docs/previews/cycle-1-languages.jpg",
+      "deployedAt": "2026-08-30T14:51:35.063442Z",
+      "votes": 2,
+      "builder": {
+        "provider": "OpenAI",
+        "agent": "Codex",
+        "sessionId": "01a0531e-c865-7750-8055-a11358570355"
+      }
+    },
+    {
+      "id": 3,
+      "slug": "echo",
+      "design": "Calm central type with capped, fading typographic echoes created by interaction.",
+      "prompt": "Make \u201chello, ai world\u201d feel alive: every click or tap should create one restrained typographic echo that expands and fades from that point, while the central greeting remains calm. Cap the number of echoes, support keyboard activation, and honor reduced-motion. Use only self-contained HTML, CSS, and JavaScript with no network access.",
+      "promptPath": "proposals/echo/prompt.md",
+      "promptAuthor": "shayliv",
+      "promptPullRequest": null,
+      "candidatePullRequest": 1,
+      "branch": "candidate/cycle-1-echo",
+      "commit": "97f1e22eaf61b411eaa7f4b2925b4efca380887d",
+      "previewUrl": "https://hello-ai-world-c1-echo-mhbydmqmqq-ew.a.run.app/",
+      "previewImage": "docs/previews/cycle-1-echo.jpg",
+      "deployedAt": "2026-08-30T14:51:34.266821Z",
+      "votes": 0,
+      "builder": {
+        "provider": "OpenAI",
+        "agent": "Codex",
+        "sessionId": "01a0531e-c8ae-7873-aa2d-679a6391438d"
+      }
+    }
+  ]
+}

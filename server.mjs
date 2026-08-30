@@ -163,7 +163,8 @@ export function createApp({
   if (!new Set(["platform", "candidate"]).has(mode)) {
     throw new Error("APP_MODE must be platform or candidate");
   }
-  if (mode === "platform" && process.env.NODE_ENV === "production") {
+  const selectedBackend = databaseBackend ?? process.env.DATABASE_BACKEND ?? "sqlite";
+  if (mode === "platform" && selectedBackend !== "repository" && process.env.NODE_ENV === "production") {
     if (!adminToken) throw new Error("ADMIN_TOKEN is required in production platform mode");
     if (!voterCookieSecret) {
       throw new Error("VOTER_COOKIE_SECRET is required in production platform mode");
@@ -172,7 +173,7 @@ export function createApp({
 
   // Candidate mode branches before storage construction by design.
   const store = mode === "platform"
-    ? storageFactory({ backend: databaseBackend, databasePath })
+    ? storageFactory({ backend: selectedBackend, databasePath })
     : null;
 
   const server = createServer((request, response) => {
