@@ -4,7 +4,7 @@ All operator actions start from GitHub's **Actions** tab. Select the named workf
 
 ## One-time configuration
 
-- Repository secret: `OPENAI_API_KEY` for `openai/codex-action@v1`.
+- Repository secret: `OPENROUTER_API_KEY`. Use a dedicated, low-credit key because the coding harness necessarily receives it while running tools.
 - GitHub environments: `staging` and `production`. Add a required reviewer to `production` when the repository plan supports it.
 - Repository variables: `GCP_PROJECT_ID`, `GCP_PROJECT_NUMBER`, `GCP_REGION`, `GCP_WIF_PROVIDER`, `GCP_DEPLOY_SERVICE_ACCOUNT`, `GCP_CONTROL_SERVICE_ACCOUNT`, and `GCP_CANDIDATE_SERVICE_ACCOUNT`.
 - GCP: the GitHub OIDC provider must be restricted to this repository's immutable numeric ID, and the deployer service account must have Cloud Run Source Developer, Service Usage Consumer, and Service Account User on the two runtime identities.
@@ -17,9 +17,10 @@ Run **Agent · Build candidate from proposal PR** with:
 
 - `proposal_pr`: an open prompt-only PR targeting `staging`;
 - `cycle_id`: `cycle-N`;
-- `model`: blank for the Codex action default, or an intentional override.
+- `builder_model`: defaults to `qwen/qwen3-coder-next`, a coding-focused OpenRouter model;
+- `classifier_model`: defaults to `qwen/qwen3.8-flash`, a separate structured-output model.
 
-The workflow rejects extra proposal files, runs the builder in workspace-only mode, applies the deterministic no-network guard, reconstructs the patch in a fresh job, runs an independent read-only classifier, and only then creates `candidate/<cycle>-<slug>` plus a candidate PR.
+The workflow rejects extra proposal files, runs a pinned OpenCode harness without GitHub write credentials, and lets it evolve agent-owned product code throughout the monorepo. A trusted guard rejects changes to workflows, deployment machinery, governance, ledgers, other proposals, credential-like files, symlinks, or oversized diffs. A fresh job reconstructs the complete patch and sends it to an independent read-only classifier. Only then can the workflow create `candidate/<cycle>-<slug>` and its candidate PR.
 
 ## 2. Deploy a candidate preview
 
@@ -33,11 +34,11 @@ The first experiment used signed-cookie test voting. The durable public voting d
 
 ## 4. Deploy staging
 
-Merge the selected world and updated ledger into `staging`, then run **Deploy · Staging** with `STAGING`. The job tests, checks deterministic docs, deploys the repository-backed wrapper, and proves `/api/state` reports `source: repository`.
+Merge the selected product evolution and updated ledger into `staging`, then run **Deploy · Staging** with `STAGING`. The job tests, checks deterministic docs, deploys the repository commit, and proves `/api/state` reports `source: repository`.
 
 ## 5. Promote production
 
-Create `releases/epoch-N.json`, update `state/current.json`, render the docs, and open a reviewed PR from `staging` to protected `production`. After merge, run **Deploy · Production** with the exact epoch and `DEPLOY`. It verifies the SHA-256 of `world/index.html` against the immutable release record before deployment.
+Create `releases/epoch-N.json`, set its `productSha256` to the output of `node scripts/product-hash.mjs`, update `state/current.json`, render the docs, and open a reviewed PR from `staging` to protected `production`. After merge, run **Deploy · Production** with the exact epoch and `DEPLOY`. It verifies the hash of every agent-owned product file against the immutable release record before deployment. Schema-v1 releases retain their legacy `worldSha256` verification.
 
 ## Recovery checks
 

@@ -1,6 +1,6 @@
 # hello-ai-world
 
-**One public website, evolving forever from prompts.** Humans submit ideas as pull requests. Maintainers select candidates. AI agents build isolated versions, a second agent classifies them, people vote, and one version advances. The source, prompts, authors, previews, decisions, and release history stay visible on GitHub.
+**One public product, evolving forever from prompts.** Humans submit ideas as pull requests. Maintainers select candidates. AI agents build isolated versions, a second agent classifies them, people vote, and one version advances. The source, prompts, authors, previews, decisions, and release history stay visible on GitHub.
 
 [Open production](https://hello-ai-world-mhbydmqmqq-ew.a.run.app/) · [Open staging](https://hello-ai-world-staging-mhbydmqmqq-ew.a.run.app/) · [Submit a prompt](https://github.com/shayliv/hello-ai-world/blob/production/CONTRIBUTING.md#submit-a-prompt) · [Full history](HISTORY.md)
 
@@ -37,7 +37,7 @@ Everything above is reconstructed from [`state/current.json`](https://github.com
 
 ## Repository is the database
 
-The deployed root contains only the selected `world/index.html`. There is no prompt form, tournament wrapper, or control dashboard in the product UI; those surfaces live here on GitHub.
+The deployed product is the selected repository commit. The initial `world/index.html` is only the seed: agents may grow frontend, backend, tests, dependencies, schemas, and new `apps/` or `packages/` workspaces. There is no prompt form, tournament wrapper, or control dashboard in the product UI; those surfaces live here on GitHub.
 
 - `proposals/<slug>/prompt.md` is the raw user request and enters through a pull request.
 - `cycles/<cycle-id>.json` is the append-only public tournament record: design, author, agent, classifier, preview, votes, and winner.
@@ -51,9 +51,9 @@ Cloud Run executes commits; it is not the system of record. Credentials remain i
 
 Use the repository's [Actions tab](https://github.com/shayliv/hello-ai-world/actions):
 
-1. **Agent · Build candidate from proposal PR** — takes a prompt-only PR and cycle ID, runs the builder and independent classifier, then opens a candidate PR. Requires the `OPENAI_API_KEY` repository secret.
+1. **Agent · Build candidate from proposal PR** — takes a prompt-only PR and cycle ID, runs a pinned OpenCode builder and independent full-diff classifier through OpenRouter, then opens a candidate PR. Requires a dedicated `OPENROUTER_API_KEY` repository secret.
 2. **Deploy · Candidate preview** — takes a candidate PR and deploys its exact head commit to an isolated Cloud Run service.
-3. **Deploy · Staging** — deploys the current `staging` branch with the selected world at its root.
+3. **Deploy · Staging** — deploys the current `staging` branch.
 4. **Deploy · Production** — verifies an immutable release and deploys the protected `production` branch after an explicit confirmation.
 
 GCP deploys authenticate with GitHub OIDC through Workload Identity Federation; there is no service-account key in GitHub. See [OPERATIONS.md](OPERATIONS.md) for inputs and recovery checks.
@@ -69,4 +69,4 @@ npm run ledger:check
 APP_MODE=platform DATABASE_BACKEND=repository npm start
 ```
 
-Candidate agents may edit only `world/index.html`; the selected prompt remains in `proposals/<slug>/prompt.md`. See [AGENTS.md](AGENTS.md) for the enforced boundary and [CONTRIBUTING.md](CONTRIBUTING.md) for prompt submissions.
+Candidate agents may evolve agent-owned product code across the monorepo. The selected prompt remains immutable, and workflows, deployment machinery, governance, and ledger paths stay protected. See [AGENTS.md](AGENTS.md) for the enforced boundary and [CONTRIBUTING.md](CONTRIBUTING.md) for prompt submissions.
