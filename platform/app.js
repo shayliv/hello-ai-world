@@ -16,11 +16,34 @@ function emptyList(root, message) {
   root.replaceChildren(element("li", message, "empty"));
 }
 
+function metadataLine(raw) {
+  const fallback = element("p", raw, "metadata");
+  try {
+    const value = JSON.parse(raw);
+    if (!value || typeof value !== "object") return fallback;
+    const line = element("p", null, "metadata");
+    const parts = [value.name, value.commit ? `commit ${value.commit}` : null, value.agentSession ? `agent ${String(value.agentSession).slice(0, 8)}` : null]
+      .filter(Boolean);
+    line.append(document.createTextNode(parts.join(" · ")));
+    if (Number.isSafeInteger(value.pullRequest)) {
+      line.append(document.createTextNode(" · "));
+      const link = element("a", `PR #${value.pullRequest}`);
+      link.href = `https://github.com/shayliv/hello-ai-world/pull/${value.pullRequest}`;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      line.append(link);
+    }
+    return line;
+  } catch {
+    return fallback;
+  }
+}
+
 function candidateCard(candidate, cycle) {
   const article = element("article", null, "candidate");
   article.append(element("h3", `Candidate ${candidate.id}`));
   article.append(element("p", candidate.prompt, "prompt"));
-  if (candidate.metadata) article.append(element("p", candidate.metadata, "metadata"));
+  if (candidate.metadata) article.append(metadataLine(candidate.metadata));
 
   const preview = element("iframe");
   preview.title = `Candidate ${candidate.id} preview`;
