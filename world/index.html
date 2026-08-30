@@ -3,11 +3,272 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#f4f1ea">
     <title>hello, ai world</title>
     <style>
-      html, body { height: 100%; margin: 0; }
-      body { display: grid; place-items: center; color: #111; font: 32px/1.2 Arial, sans-serif; }
+      :root {
+        color-scheme: light;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f4f1ea;
+        color: #11110f;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        min-height: 100%;
+        margin: 0;
+      }
+
+      body {
+        min-height: 100svh;
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 50% 47%, rgba(255, 255, 255, 0.96) 0 15%, rgba(255, 255, 255, 0) 52%),
+          linear-gradient(145deg, #f8f6f0 0%, #f1eee6 100%);
+      }
+
+      .composition {
+        position: relative;
+        display: grid;
+        min-height: 100svh;
+        place-items: center;
+        padding: clamp(2rem, 7vw, 7rem);
+        isolation: isolate;
+      }
+
+      .composition::before {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background-image: radial-gradient(rgba(17, 17, 15, 0.085) 0.55px, transparent 0.55px);
+        background-size: 5px 5px;
+        content: "";
+        opacity: 0.16;
+        pointer-events: none;
+      }
+
+      .stage {
+        --orbit-angle: -7deg;
+        --orbit-scale: 1;
+        position: relative;
+        display: grid;
+        place-items: center;
+        width: max-content;
+        max-width: 100%;
+      }
+
+      h1 {
+        position: relative;
+        z-index: 2;
+        margin: 0;
+        font-size: clamp(2.7rem, 10.6vw, 9.5rem);
+        font-weight: 500;
+        letter-spacing: -0.075em;
+        line-height: 0.9;
+        white-space: nowrap;
+      }
+
+      .orbit {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: calc(100% + clamp(4.75rem, 15vw, 12rem));
+        height: calc(100% + clamp(3.5rem, 9vw, 7rem));
+        border: 1px solid rgba(17, 17, 15, 0.12);
+        border-radius: 50%;
+        pointer-events: none;
+        transform: translate(-50%, -50%) rotate(var(--orbit-angle)) scaleY(var(--orbit-scale));
+        transform-origin: center;
+        transition: transform 700ms cubic-bezier(0.2, 0.8, 0.2, 1);
+      }
+
+      .dot {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        z-index: 3;
+        width: clamp(0.42rem, 0.7vw, 0.62rem);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        background: #090908;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.04), 0 2px 5px rgba(0, 0, 0, 0.13);
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        will-change: transform;
+      }
+
+      .control {
+        position: absolute;
+        inset: clamp(-4rem, -8vw, -2rem);
+        z-index: 4;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: inherit;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .control:focus-visible {
+        outline: 2px solid #11110f;
+        outline-offset: 0.5rem;
+      }
+
+      .control:disabled {
+        cursor: default;
+        opacity: 1;
+      }
+
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+
+      @media (max-width: 480px) {
+        .composition {
+          padding-inline: 1.25rem;
+        }
+
+        h1 {
+          font-size: clamp(2.4rem, 12.4vw, 3.75rem);
+        }
+
+        .orbit {
+          width: calc(100% + 3.5rem);
+          height: calc(100% + 3rem);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .orbit {
+          transform: translate(-50%, -50%) rotate(-9deg) scaleY(0.94);
+          transition: none;
+        }
+
+        .dot {
+          will-change: auto;
+        }
+      }
     </style>
   </head>
-  <body>hello, ai world</body>
+  <body>
+    <main class="composition">
+      <div class="stage">
+        <div class="orbit" aria-hidden="true"></div>
+        <h1>hello, ai world</h1>
+        <span class="dot" aria-hidden="true"></span>
+        <button class="control" type="button" aria-describedby="instructions">
+          <span class="sr-only">Reverse the orbit</span>
+        </button>
+      </div>
+      <p class="sr-only" id="instructions">Move the pointer to gently bend the orbit. Activate to briefly reverse its direction.</p>
+    </main>
+
+    <script>
+      (() => {
+        const stage = document.querySelector(".stage");
+        const orbit = document.querySelector(".orbit");
+        const dot = document.querySelector(".dot");
+        const control = document.querySelector(".control");
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+        let angle = -0.72;
+        let direction = 1;
+        let reverseTimer = 0;
+        let frame = 0;
+        let previousTime = 0;
+        let bendX = 0;
+        let bendY = 0;
+        let targetBendX = 0;
+        let targetBendY = 0;
+
+        const placeDot = () => {
+          const radiusX = orbit.offsetWidth / 2;
+          const radiusY = orbit.offsetHeight / 2;
+          const baseRotation = reducedMotion.matches ? -9 : -7;
+          const baseScale = reducedMotion.matches ? 0.94 : 1;
+          const rotation = (baseRotation + bendX * 4.5) * Math.PI / 180;
+          const scaleY = baseScale + bendY * 0.12;
+          const ellipseX = Math.cos(angle) * radiusX;
+          const ellipseY = Math.sin(angle) * radiusY * scaleY;
+          const x = ellipseX * Math.cos(rotation) - ellipseY * Math.sin(rotation);
+          const y = ellipseX * Math.sin(rotation) + ellipseY * Math.cos(rotation);
+          const depth = (Math.sin(angle) + 1) / 2;
+
+          dot.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${0.82 + depth * 0.26})`;
+          dot.style.opacity = String(0.62 + depth * 0.38);
+          dot.style.zIndex = depth < 0.48 ? "1" : "3";
+          stage.style.setProperty("--orbit-angle", `${baseRotation + bendX * 4.5}deg`);
+          stage.style.setProperty("--orbit-scale", String(scaleY));
+        };
+
+        const animate = (time) => {
+          const elapsed = previousTime ? Math.min(time - previousTime, 40) : 0;
+          previousTime = time;
+          bendX += (targetBendX - bendX) * 0.045;
+          bendY += (targetBendY - bendY) * 0.045;
+          angle += elapsed * 0.00034 * direction;
+          placeDot();
+          frame = requestAnimationFrame(animate);
+        };
+
+        const setMotionPreference = () => {
+          cancelAnimationFrame(frame);
+          previousTime = 0;
+
+          if (reducedMotion.matches) {
+            clearTimeout(reverseTimer);
+            control.disabled = true;
+            control.setAttribute("aria-label", "Still orbital composition");
+            angle = -0.72;
+            bendX = 0;
+            bendY = 0;
+            targetBendX = 0;
+            targetBendY = 0;
+            placeDot();
+          } else {
+            control.disabled = false;
+            control.removeAttribute("aria-label");
+            frame = requestAnimationFrame(animate);
+          }
+        };
+
+        window.addEventListener("pointermove", (event) => {
+          if (reducedMotion.matches) return;
+          targetBendX = (event.clientX / window.innerWidth - 0.5) * 2;
+          targetBendY = (event.clientY / window.innerHeight - 0.5) * 2;
+        }, { passive: true });
+
+        document.documentElement.addEventListener("pointerleave", () => {
+          targetBendX = 0;
+          targetBendY = 0;
+        });
+
+        control.addEventListener("click", () => {
+          if (reducedMotion.matches) return;
+          direction = -1;
+          clearTimeout(reverseTimer);
+          reverseTimer = window.setTimeout(() => {
+            direction = 1;
+          }, 1100);
+        });
+
+        window.addEventListener("resize", placeDot, { passive: true });
+        reducedMotion.addEventListener("change", setMotionPreference);
+        setMotionPreference();
+      })();
+    </script>
+  </body>
 </html>

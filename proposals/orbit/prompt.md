@@ -1,0 +1,1 @@
+Keep “hello, ai world” as the entire idea, but make a tiny black dot orbit the words. Pointer movement should gently bend the orbit, clicking should briefly reverse it, and reduced-motion users should see a still, beautiful composition. Use only self-contained HTML, CSS, and JavaScript with no network access.
