@@ -3,11 +3,235 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>hello, ai world</title>
+    <meta name="color-scheme" content="light">
+    <meta name="theme-color" content="#f4f1eb">
+    <title>hello, ai world — languages</title>
     <style>
-      html, body { height: 100%; margin: 0; }
-      body { display: grid; place-items: center; color: #111; font: 32px/1.2 Arial, sans-serif; }
+      :root {
+        color-scheme: light;
+        font-family: Arial, "Noto Sans", "Noto Sans Arabic", "Noto Sans Hebrew", sans-serif;
+        background: #f4f1eb;
+        color: #171715;
+      }
+
+      * { box-sizing: border-box; }
+
+      html,
+      body { min-height: 100%; margin: 0; }
+
+      body { min-height: 100svh; background: #f4f1eb; }
+
+      button { font: inherit; }
+
+      .portal {
+        position: relative;
+        display: grid;
+        min-height: 100svh;
+        overflow: hidden;
+      }
+
+      .portal::before {
+        position: absolute;
+        inset: 1rem;
+        border: 1px solid rgba(23, 23, 21, 0.09);
+        border-radius: 1rem;
+        content: "";
+        pointer-events: none;
+      }
+
+      .greeting-button {
+        display: grid;
+        width: 100%;
+        min-height: 100svh;
+        padding: clamp(4rem, 12vw, 8rem) clamp(1.5rem, 8vw, 7rem);
+        border: 0;
+        border-radius: 0;
+        color: inherit;
+        background: transparent;
+        cursor: pointer;
+        place-items: center;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .greeting-button:focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: -0.7rem;
+      }
+
+      .greeting-button:active .greeting { transform: scale(0.995); }
+
+      .greeting {
+        display: grid;
+        max-width: 70rem;
+        text-align: center;
+        place-items: center;
+        transition: opacity 160ms ease, transform 160ms ease;
+      }
+
+      .greeting.is-changing {
+        opacity: 0;
+        transform: translateY(0.3rem);
+      }
+
+      .phrase {
+        margin: 0;
+        font-size: clamp(2.4rem, 7.4vw, 7.25rem);
+        font-weight: 400;
+        letter-spacing: -0.045em;
+        line-height: 1.02;
+        text-wrap: balance;
+      }
+
+      .language {
+        margin: clamp(1.4rem, 3vw, 2.25rem) 0 0;
+        color: rgba(23, 23, 21, 0.56);
+        font-size: clamp(0.72rem, 1.15vw, 0.9rem);
+        font-weight: 400;
+        letter-spacing: 0.14em;
+        line-height: 1.5;
+        text-transform: uppercase;
+      }
+
+      .language span[lang] { color: rgba(23, 23, 21, 0.82); }
+
+      .hint,
+      .count {
+        position: absolute;
+        z-index: 1;
+        bottom: max(1.75rem, env(safe-area-inset-bottom));
+        margin: 0;
+        color: rgba(23, 23, 21, 0.42);
+        font-size: 0.68rem;
+        letter-spacing: 0.12em;
+        line-height: 1;
+        pointer-events: none;
+        text-transform: uppercase;
+      }
+
+      .hint { left: max(1.75rem, env(safe-area-inset-left)); }
+      .count { right: max(1.75rem, env(safe-area-inset-right)); font-variant-numeric: tabular-nums; }
+
+      @media (hover: hover) {
+        .greeting-button:hover .language { color: rgba(23, 23, 21, 0.72); }
+      }
+
+      @media (max-width: 35rem) {
+        .portal::before { inset: 0.6rem; border-radius: 0.75rem; }
+        .greeting-button { padding-inline: 1.3rem; }
+        .phrase { letter-spacing: -0.035em; }
+        .hint, .count { bottom: max(1.25rem, env(safe-area-inset-bottom)); }
+        .hint { left: max(1.25rem, env(safe-area-inset-left)); }
+        .count { right: max(1.25rem, env(safe-area-inset-right)); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .greeting { transition: none; }
+      }
     </style>
   </head>
-  <body>hello, ai world</body>
+  <body>
+    <main class="portal">
+      <button class="greeting-button" id="next-greeting" type="button" aria-describedby="hint" aria-label="Show the next language">
+        <span class="greeting" id="greeting" aria-live="polite" aria-atomic="true">
+          <span class="phrase" id="phrase">hello, ai world</span>
+          <span class="language" id="language"><span lang="en">English</span></span>
+        </span>
+      </button>
+      <p class="hint" id="hint">tap · click · press enter</p>
+      <p class="count" id="count" aria-hidden="true">01 / 20</p>
+    </main>
+
+    <script>
+      (() => {
+        "use strict";
+
+        const greetings = [
+          { id: "english", language: "English", nativeName: "English", lang: "en", dir: "ltr", phrase: "hello, ai world" },
+          { id: "spanish", language: "Spanish", nativeName: "Español", lang: "es", dir: "ltr", phrase: "hola, mundo de la ia" },
+          { id: "french", language: "French", nativeName: "Français", lang: "fr", dir: "ltr", phrase: "bonjour, monde de l’ia" },
+          { id: "portuguese", language: "Portuguese", nativeName: "Português", lang: "pt", dir: "ltr", phrase: "olá, mundo da ia" },
+          { id: "german", language: "German", nativeName: "Deutsch", lang: "de", dir: "ltr", phrase: "hallo, ki-welt" },
+          { id: "italian", language: "Italian", nativeName: "Italiano", lang: "it", dir: "ltr", phrase: "ciao, mondo dell’ia" },
+          { id: "polish", language: "Polish", nativeName: "Polski", lang: "pl", dir: "ltr", phrase: "witaj, świecie ai" },
+          { id: "ukrainian", language: "Ukrainian", nativeName: "Українська", lang: "uk", dir: "ltr", phrase: "привіт, світе ші" },
+          { id: "greek", language: "Greek", nativeName: "Ελληνικά", lang: "el", dir: "ltr", phrase: "γεια σου, κόσμε της τεχνητής νοημοσύνης" },
+          { id: "hebrew", language: "Hebrew", nativeName: "עברית", lang: "he", dir: "rtl", phrase: "שלום, עולם הבינה המלאכותית" },
+          { id: "arabic", language: "Arabic", nativeName: "العربية", lang: "ar", dir: "rtl", phrase: "مرحبًا يا عالم الذكاء الاصطناعي" },
+          { id: "persian", language: "Persian", nativeName: "فارسی", lang: "fa", dir: "rtl", phrase: "سلام، دنیای هوش مصنوعی" },
+          { id: "hindi", language: "Hindi", nativeName: "हिन्दी", lang: "hi", dir: "ltr", phrase: "नमस्ते, एआई दुनिया" },
+          { id: "bengali", language: "Bengali", nativeName: "বাংলা", lang: "bn", dir: "ltr", phrase: "হ্যালো, এআই বিশ্ব" },
+          { id: "chinese", language: "Chinese", nativeName: "中文", lang: "zh-Hans", dir: "ltr", phrase: "你好，人工智能世界" },
+          { id: "japanese", language: "Japanese", nativeName: "日本語", lang: "ja", dir: "ltr", phrase: "こんにちは、AIの世界" },
+          { id: "korean", language: "Korean", nativeName: "한국어", lang: "ko", dir: "ltr", phrase: "안녕, AI 세상" },
+          { id: "thai", language: "Thai", nativeName: "ไทย", lang: "th", dir: "ltr", phrase: "สวัสดี โลกเอไอ" },
+          { id: "vietnamese", language: "Vietnamese", nativeName: "Tiếng Việt", lang: "vi", dir: "ltr", phrase: "xin chào, thế giới ai" },
+          { id: "swahili", language: "Swahili", nativeName: "Kiswahili", lang: "sw", dir: "ltr", phrase: "jambo, ulimwengu wa ai" }
+        ];
+
+        const button = document.querySelector("#next-greeting");
+        const greeting = document.querySelector("#greeting");
+        const phrase = document.querySelector("#phrase");
+        const language = document.querySelector("#language");
+        const count = document.querySelector("#count");
+        const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+        let current = 0;
+        let changeTimer = 0;
+
+        const indexFromHash = () => {
+          let id = "";
+          try { id = decodeURIComponent(location.hash.slice(1)).toLowerCase(); } catch { return 0; }
+          const index = greetings.findIndex((item) => item.id === id);
+          return index < 0 ? 0 : index;
+        };
+
+        const draw = (index, animate = false) => {
+          window.clearTimeout(changeTimer);
+
+          const update = () => {
+            const item = greetings[index];
+            current = index;
+            phrase.textContent = item.phrase;
+            phrase.lang = item.lang;
+            phrase.dir = item.dir;
+            language.innerHTML = "";
+
+            const nativeName = document.createElement("span");
+            nativeName.lang = item.lang;
+            nativeName.dir = item.dir;
+            nativeName.textContent = item.nativeName;
+            language.append(nativeName);
+
+            if (item.nativeName !== item.language) {
+              language.append(document.createTextNode(` · ${item.language}`));
+            }
+
+            count.textContent = `${String(index + 1).padStart(2, "0")} / ${greetings.length}`;
+            document.title = `${item.phrase} — ${item.language}`;
+            greeting.classList.remove("is-changing");
+          };
+
+          if (animate && !reducedMotion.matches) {
+            greeting.classList.add("is-changing");
+            changeTimer = window.setTimeout(update, 160);
+          } else {
+            update();
+          }
+        };
+
+        const selectNext = () => {
+          const next = (current + 1) % greetings.length;
+          current = next;
+          history.pushState(null, "", `#${greetings[next].id}`);
+          draw(next, true);
+        };
+
+        button.addEventListener("click", selectNext);
+        window.addEventListener("hashchange", () => draw(indexFromHash(), true));
+        window.addEventListener("popstate", () => draw(indexFromHash(), true));
+
+        current = indexFromHash();
+        draw(current);
+      })();
+    </script>
+  </body>
 </html>
