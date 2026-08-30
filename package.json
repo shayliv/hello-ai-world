@@ -10,7 +10,10 @@
     "start": "node server.mjs",
     "test": "node --test",
     "validate": "node --test",
-    "validate:evolution": "node scripts/validate-evolution.mjs"
+    "validate:evolution": "node scripts/validate-evolution.mjs",
+    "ledger:render": "node scripts/render-ledger.mjs",
+    "ledger:check": "node scripts/render-ledger.mjs --check",
+    "release:verify": "node scripts/verify-release.mjs"
   },
   "dependencies": {
     "@google-cloud/firestore": "^9.0.0"

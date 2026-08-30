@@ -4,6 +4,8 @@ const proposalsRoot = document.querySelector("#proposals");
 const historyRoot = document.querySelector("#history");
 const proposalForm = document.querySelector("#proposal-form");
 const proposalStatus = document.querySelector("#proposal-status");
+const githubProposal = document.querySelector("#github-proposal");
+const proposalLink = document.querySelector("#proposal-link");
 
 function element(tag, text, className) {
   const node = document.createElement(tag);
@@ -22,7 +24,7 @@ function metadataLine(raw) {
     const value = JSON.parse(raw);
     if (!value || typeof value !== "object") return fallback;
     const line = element("p", null, "metadata");
-    const parts = [value.name, value.commit ? `commit ${value.commit}` : null, value.agentSession ? `agent ${String(value.agentSession).slice(0, 8)}` : null]
+    const parts = [value.name, value.author ? `by @${value.author}` : null, value.commit ? `commit ${value.commit}` : null, value.agentSession ? `agent ${String(value.agentSession).slice(0, 8)}` : null]
       .filter(Boolean);
     line.append(document.createTextNode(parts.join(" · ")));
     if (Number.isSafeInteger(value.pullRequest)) {
@@ -44,6 +46,7 @@ function candidateCard(candidate, cycle) {
   article.append(element("h3", `Candidate ${candidate.id}`));
   article.append(element("p", candidate.prompt, "prompt"));
   if (candidate.metadata) article.append(metadataLine(candidate.metadata));
+  if (candidate.design) article.append(element("p", candidate.design, "design"));
 
   const preview = element("iframe");
   preview.title = `Candidate ${candidate.id} preview`;
@@ -57,24 +60,32 @@ function candidateCard(candidate, cycle) {
   link.rel = "noopener noreferrer";
   article.append(link);
 
-  const vote = element("button", cycle.hasVoted ? "Vote recorded" : "Vote for this candidate");
-  vote.type = "button";
-  vote.disabled = cycle.status !== "open" || cycle.hasVoted;
-  vote.addEventListener("click", async () => {
-    vote.disabled = true;
-    const response = await fetch(`/api/cycles/${cycle.id}/votes`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ candidateId: candidate.id }),
+  if (cycle.status === "open" && candidate.voteUrl) {
+    const vote = element("a", "Vote on GitHub", "vote-link");
+    vote.href = candidate.voteUrl;
+    vote.target = "_blank";
+    vote.rel = "noopener noreferrer";
+    article.append(vote);
+  } else {
+    const vote = element("button", cycle.hasVoted ? "Vote recorded" : "Vote for this candidate");
+    vote.type = "button";
+    vote.disabled = cycle.status !== "open" || cycle.hasVoted;
+    vote.addEventListener("click", async () => {
+      vote.disabled = true;
+      const response = await fetch(`/api/cycles/${cycle.id}/votes`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ candidateId: candidate.id }),
+      });
+      if (!response.ok) {
+        const body = await response.json();
+        vote.textContent = body.error ?? "Vote failed";
+        return;
+      }
+      await render();
     });
-    if (!response.ok) {
-      const body = await response.json();
-      vote.textContent = body.error ?? "Vote failed";
-      return;
-    }
-    await render();
-  });
-  article.append(vote);
+    article.append(vote);
+  }
 
   if (cycle.status !== "open") article.append(element("p", `${candidate.votes} vote${candidate.votes === 1 ? "" : "s"}`));
   if (cycle.winnerCandidateId === candidate.id) article.append(element("strong", "Winner"));
@@ -86,6 +97,14 @@ async function render() {
   if (!response.ok) throw new Error("state unavailable");
   const state = await response.json();
   production.src = state.currentProduction.previewUrl;
+
+  if (state.submissionUrl) {
+    proposalForm.hidden = true;
+    githubProposal.hidden = false;
+    proposalLink.href = state.submissionUrl;
+    proposalLink.target = "_blank";
+    proposalLink.rel = "noopener noreferrer";
+  }
 
   cycleRoot.replaceChildren();
   if (!state.cycle) {
@@ -99,7 +118,11 @@ async function render() {
   }
 
   proposalsRoot.replaceChildren();
-  for (const proposal of state.proposals) proposalsRoot.append(element("li", proposal.prompt));
+  for (const proposal of state.proposals) {
+    const item = element("li", proposal.prompt);
+    if (proposal.author) item.append(element("small", ` — @${proposal.author}`, "metadata"));
+    proposalsRoot.append(item);
+  }
   if (!state.proposals.length) emptyList(proposalsRoot, "No prompts yet.");
 
   historyRoot.replaceChildren();
@@ -117,7 +140,7 @@ async function render() {
   if (!state.history.length) emptyList(historyRoot, "No releases yet.");
 }
 
-proposalForm.addEventListener("submit", async (event) => {
+proposalForm?.addEventListener("submit", async (event) => {
   event.preventDefault();
   proposalStatus.textContent = "Submitting…";
   const prompt = new FormData(proposalForm).get("prompt");

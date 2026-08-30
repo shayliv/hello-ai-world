@@ -61,6 +61,28 @@ test("candidate mode serves only the world and health without touching storage",
   }
 });
 
+test("repository backend serves the committed public ledger without mutable secrets", async () => {
+  const app = await start({ databaseBackend: "repository", adminToken: "", voterCookieSecret: "" });
+  try {
+    const state = await json(app.baseUrl, "/api/state");
+    assert.equal(state.response.status, 200);
+    assert.equal(state.body.source, "repository");
+    assert.equal(state.body.currentProduction.releaseId, "epoch-1");
+    assert.equal(state.body.cycle.id, "cycle-1");
+    assert.equal(state.body.cycle.candidates.length, 3);
+    assert.equal(state.body.cycle.candidates.find((candidate) => candidate.slug === "languages").votes, 2);
+
+    const proposal = await json(app.baseUrl, "/api/proposals", {
+      method: "POST",
+      body: { prompt: "try to mutate the ledger" },
+    });
+    assert.equal(proposal.response.status, 409);
+    assert.match(proposal.body.error, /read-only/);
+  } finally {
+    await app.close();
+  }
+});
+
 test("candidate mode does not create a database file", async () => {
   const directory = mkdtempSync(join(tmpdir(), "hello-ai-world-candidate-"));
   const databasePath = join(directory, "must-not-exist.sqlite");

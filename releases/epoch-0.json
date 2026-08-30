@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "id": "epoch-0",
+  "title": "Genesis",
+  "releasedAt": "2026-08-30T13:30:58Z",
+  "commit": "2a096c825e932f9342ac57b38ef33352305fd568",
+  "worldSha256": "37373812815bb1cbe13fb6137deacd65c8e9a9e41d1b03f8565d3c7db6c3fbcf",
+  "author": "shayliv",
+  "sourceCycle": null,
+  "winner": null,
+  "prompt": "Start with one dot: a simple HTML page and server saying hello, ai world.",
+  "previewUrl": "https://hello-ai-world-epoch0-mhbydmqmqq-ew.a.run.app/",
+  "previewImage": "docs/previews/epoch-0.jpg",
+  "promotionPullRequest": null
+}

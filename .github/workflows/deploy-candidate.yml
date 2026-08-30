@@ -1,0 +1,103 @@
+name: Deploy · Candidate preview
+
+on:
+  workflow_dispatch:
+    inputs:
+      candidate_pr:
+        description: Candidate pull request number targeting staging
+        required: true
+        type: string
+      cycle_id:
+        description: Cycle id, for example cycle-2
+        required: true
+        default: cycle-2
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+concurrency:
+  group: preview-${{ inputs.candidate_pr }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: staging
+          fetch-depth: 0
+          persist-credentials: false
+      - id: candidate
+        name: Validate and check out candidate PR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_PR: ${{ inputs.candidate_pr }}
+          CYCLE_ID: ${{ inputs.cycle_id }}
+        run: |
+          set -euo pipefail
+          [[ "$CANDIDATE_PR" =~ ^[1-9][0-9]*$ ]] || { echo "candidate_pr must be numeric" >&2; exit 1; }
+          [[ "$CYCLE_ID" =~ ^cycle-[1-9][0-9]*$ ]] || { echo "invalid cycle_id" >&2; exit 1; }
+          base=$(gh pr view "$CANDIDATE_PR" --json baseRefName --jq .baseRefName)
+          [[ "$base" == staging ]] || { echo "candidate PR must target staging" >&2; exit 1; }
+          mapfile -t prompts < <(gh pr view "$CANDIDATE_PR" --json files --jq '.files[].path | select(test("^proposals/[a-z0-9][a-z0-9-]*/prompt\\.md$"))')
+          [[ ${#prompts[@]} -eq 1 ]] || { echo "candidate PR must contain one prompt" >&2; exit 1; }
+          prompt_path=${prompts[0]}
+          slug=${prompt_path#proposals/}
+          slug=${slug%/prompt.md}
+          cycle_number=${CYCLE_ID#cycle-}
+          service="hello-ai-world-c${cycle_number}-${slug}"
+          [[ ${#service} -le 63 ]] || { echo "generated service name is too long" >&2; exit 1; }
+          head_sha=$(gh pr view "$CANDIDATE_PR" --json headRefOid --jq .headRefOid)
+          git fetch --no-tags origin "+refs/pull/$CANDIDATE_PR/head:refs/remotes/origin/candidate-input"
+          git checkout --detach "$head_sha"
+          node scripts/validate-evolution.mjs --base origin/staging
+          {
+            echo "service=$service"
+            echo "slug=$slug"
+            echo "head_sha=$head_sha"
+          } >> "$GITHUB_OUTPUT"
+      - uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      - id: deploy
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          region: ${{ vars.GCP_REGION }}
+          service: ${{ steps.candidate.outputs.service }}
+          source: .
+          env_vars: |-
+            APP_MODE=candidate
+            NODE_ENV=production
+          env_vars_update_strategy: overwrite
+          labels: |-
+            hello-ai-world-kind=candidate
+            hello-ai-world-cycle=${{ inputs.cycle_id }}
+            hello-ai-world-candidate=${{ steps.candidate.outputs.slug }}
+          flags: >-
+            --service-account=${{ vars.GCP_CANDIDATE_SERVICE_ACCOUNT }}
+            --no-invoker-iam-check
+            --min-instances=0
+            --max-instances=2
+            --memory=256Mi
+            --cpu=1
+      - name: Smoke and publish preview evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CANDIDATE_PR: ${{ inputs.candidate_pr }}
+          URL: ${{ steps.deploy.outputs.url }}
+          HEAD_SHA: ${{ steps.candidate.outputs.head_sha }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 6 --retry-delay 5 "$URL/healthz"
+          # shellcheck disable=SC2016
+          body=$(printf 'Preview deployed from exact commit `%s`: %s\n\nWorkflow evidence: %s/actions/runs/%s' "$HEAD_SHA" "$URL" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
+          gh pr comment "$CANDIDATE_PR" --body "$body"
+          echo "Preview: $URL" >> "$GITHUB_STEP_SUMMARY"
