@@ -53,6 +53,8 @@ test("candidate mode serves only the world and health without touching storage",
     assert.match(world.headers.get("content-security-policy"), /frame-ancestors http: https:/);
     const health = await json(app.baseUrl, "/healthz");
     assert.deepEqual(health.body, { ok: true, mode: "candidate" });
+    const apiHealth = await json(app.baseUrl, "/api/health");
+    assert.deepEqual(apiHealth.body, { ok: true, mode: "candidate" });
     assert.equal((await fetch(`${app.baseUrl}/api/state`)).status, 404);
     assert.equal((await fetch(`${app.baseUrl}/app.js`)).status, 404);
     assert.equal(storageTouched, false);
@@ -252,6 +254,7 @@ test("health and platform responses carry security headers", async () => {
     assert.equal(health.headers.get("x-content-type-options"), "nosniff");
     assert.equal(health.headers.get("referrer-policy"), "no-referrer");
     assert.match(health.headers.get("permissions-policy"), /camera=\(\)/);
+    assert.equal((await fetch(`${app.baseUrl}/api/health`)).status, 200);
     const wrapper = await fetch(`${app.baseUrl}/`);
     assert.match(wrapper.headers.get("content-security-policy"), /frame-ancestors 'none'/);
     assert.match(await wrapper.text(), /sandbox="allow-scripts"/);
