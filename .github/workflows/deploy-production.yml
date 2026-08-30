@@ -1,0 +1,87 @@
+name: Deploy · Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_id:
+        description: Immutable release id, for example epoch-1
+        required: true
+        type: string
+      confirm:
+        description: Type DEPLOY to release the protected production branch
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: inputs.confirm == 'DEPLOY'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: production
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run ledger:check
+      - name: Verify immutable release against the production world
+        env:
+          RELEASE_ID: ${{ inputs.release_id }}
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_ID" =~ ^epoch-[0-9]+$ ]] || { echo "invalid release id" >&2; exit 1; }
+          node scripts/verify-release.mjs "$RELEASE_ID"
+          current=$(node -e 'const s=require("./state/current.json");process.stdout.write(s.production.release)')
+          [[ "$current" == "$RELEASE_ID" ]] || { echo "state/current.json points to $current" >&2; exit 1; }
+      - uses: google-github-actions/auth@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      - id: deploy
+        uses: google-github-actions/deploy-cloudrun@v3
+        with:
+          project_id: ${{ vars.GCP_PROJECT_ID }}
+          region: ${{ vars.GCP_REGION }}
+          service: hello-ai-world
+          source: .
+          env_vars: |-
+            APP_MODE=platform
+            NODE_ENV=production
+            DATABASE_BACKEND=repository
+          env_vars_update_strategy: overwrite
+          secrets: "{}"
+          secrets_update_strategy: overwrite
+          labels: |-
+            hello-ai-world-kind=production
+            hello-ai-world-release=${{ inputs.release_id }}
+          flags: >-
+            --service-account=${{ vars.GCP_CONTROL_SERVICE_ACCOUNT }}
+            --no-invoker-iam-check
+            --min-instances=0
+            --max-instances=3
+            --memory=512Mi
+            --cpu=1
+      - name: Smoke repository-backed production
+        env:
+          URL: ${{ steps.deploy.outputs.url }}
+          RELEASE_ID: ${{ inputs.release_id }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error --retry 6 --retry-delay 5 "$URL/healthz"
+          curl --fail --silent --show-error "$URL/api/state" | RELEASE_ID="$RELEASE_ID" node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const v=JSON.parse(s);if(v.source!=="repository"||v.currentProduction.releaseId!==process.env.RELEASE_ID)process.exit(1)})'
+          echo "Production: $URL" >> "$GITHUB_STEP_SUMMARY"

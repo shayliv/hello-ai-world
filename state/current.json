@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "repository": "shayliv/hello-ai-world",
+  "submissionUrl": "https://github.com/shayliv/hello-ai-world/blob/production/CONTRIBUTING.md#submit-a-prompt",
+  "production": {
+    "release": "epoch-1",
+    "branch": "production",
+    "commit": "1385e9af4fbfc4b7ba7d8a56f36f5c092e6edf8d",
+    "url": "https://hello-ai-world-mhbydmqmqq-ew.a.run.app/",
+    "previewImage": "docs/previews/epoch-1.jpg",
+    "deployedAt": "2026-08-30T15:00:11.308355Z"
+  },
+  "staging": {
+    "cycle": "cycle-1",
+    "branch": "staging",
+    "commit": "78e662ae6e544e8b56c9e38fd6a3dca63fdc5e50",
+    "url": "https://hello-ai-world-staging-mhbydmqmqq-ew.a.run.app/",
+    "deployedAt": "2026-08-30T14:56:22.233982Z"
+  }
+}
