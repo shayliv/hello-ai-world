@@ -1,0 +1,35 @@
+[features]
+hooks = true
+
+[hooks]
+[[hooks.PostToolUse]]
+matcher = ''
+
+[[hooks.PostToolUse.hooks]]
+command = "if [ -x '/usr/local/bin/rgt' ]; then exec '/usr/local/bin/rgt' codex-hook; elif command -v rgt >/dev/null 2>&1; then exec rgt codex-hook; else exit 0; fi"
+commandWindows = '"/usr/local/bin/rgt" codex-hook || rgt codex-hook'
+type = 'command'
+
+[[hooks.SessionStart]]
+matcher = ''
+
+[[hooks.SessionStart.hooks]]
+command = "if [ -x '/usr/local/bin/rgt' ]; then exec '/usr/local/bin/rgt' codex-hook; elif command -v rgt >/dev/null 2>&1; then exec rgt codex-hook; else exit 0; fi"
+commandWindows = '"/usr/local/bin/rgt" codex-hook || rgt codex-hook'
+type = 'command'
+
+[[hooks.Stop]]
+matcher = ''
+
+[[hooks.Stop.hooks]]
+command = "if [ -x '/usr/local/bin/rgt' ]; then exec '/usr/local/bin/rgt' codex-hook; elif command -v rgt >/dev/null 2>&1; then exec rgt codex-hook; else exit 0; fi"
+commandWindows = '"/usr/local/bin/rgt" codex-hook || rgt codex-hook'
+type = 'command'
+
+[[hooks.UserPromptSubmit]]
+matcher = ''
+
+[[hooks.UserPromptSubmit.hooks]]
+command = "if [ -x '/usr/local/bin/rgt' ]; then exec '/usr/local/bin/rgt' codex-hook; elif command -v rgt >/dev/null 2>&1; then exec rgt codex-hook; else exit 0; fi"
+commandWindows = '"/usr/local/bin/rgt" codex-hook || rgt codex-hook'
+type = 'command'

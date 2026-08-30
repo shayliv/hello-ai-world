@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>hello, ai world tournament</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header>
+      <p class="eyebrow">trusted platform</p>
+      <h1>hello, ai world</h1>
+      <p>Prompt-only experiments, one vote at a time.</p>
+    </header>
+    <main>
+      <section aria-labelledby="production-title">
+        <h2 id="production-title">Current production world</h2>
+        <iframe id="production" title="Current production world" sandbox="allow-scripts"></iframe>
+      </section>
+      <section aria-labelledby="proposal-title">
+        <h2 id="proposal-title">Propose a world</h2>
+        <form id="proposal-form">
+          <label for="prompt">Prompt for a candidate agent</label>
+          <textarea id="prompt" name="prompt" maxlength="2000" required></textarea>
+          <button type="submit">Submit prompt</button>
+          <output id="proposal-status" aria-live="polite"></output>
+        </form>
+      </section>
+      <section aria-labelledby="cycle-title">
+        <h2 id="cycle-title">Tournament</h2>
+        <div id="cycle" aria-live="polite">Loading…</div>
+      </section>
+      <section aria-labelledby="prompts-title">
+        <h2 id="prompts-title">Submitted prompts</h2>
+        <ol id="proposals"></ol>
+      </section>
+      <section aria-labelledby="history-title">
+        <h2 id="history-title">Release history</h2>
+        <ol id="history"></ol>
+      </section>
+    </main>
+  </body>
+</html>
