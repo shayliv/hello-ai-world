@@ -8,9 +8,6 @@ import { StoreError } from "./storage/sqlite.mjs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const files = {
-  platform: readFileSync(join(here, "platform", "index.html")),
-  script: readFileSync(join(here, "platform", "app.js")),
-  styles: readFileSync(join(here, "platform", "styles.css")),
   world: readFileSync(join(here, "world", "index.html")),
 };
 
@@ -197,7 +194,7 @@ export function createApp({
 
   async function handle(request, response) {
     const path = new URL(request.url, "http://request.invalid").pathname;
-    const worldRequest = (path === "/" && mode === "candidate") || path === "/world/index.html";
+    const worldRequest = path === "/" || path === "/index.html" || path === "/world/index.html";
     baseHeaders(response, { embeddable: worldRequest });
 
     if (request.method === "GET" && (path === "/healthz" || path === "/api/health")) {
@@ -213,18 +210,6 @@ export function createApp({
       return;
     }
 
-    if (request.method === "GET" && (path === "/" || path === "/index.html")) {
-      send(response, 200, files.platform, "text/html; charset=utf-8");
-      return;
-    }
-    if (request.method === "GET" && path === "/app.js") {
-      send(response, 200, files.script, "text/javascript; charset=utf-8");
-      return;
-    }
-    if (request.method === "GET" && path === "/styles.css") {
-      send(response, 200, files.styles, "text/css; charset=utf-8");
-      return;
-    }
     if (request.method === "GET" && path === "/api/state") {
       response.setHeader("cache-control", "no-store");
       send(response, 200, await store.dashboard(readVoter(request, voterCookieSecret)));
