@@ -6,10 +6,10 @@ Every public contribution starts as a prompt-only pull request against `staging`
 
 1. Fork the repository and create a branch named `proposal/<slug>`.
 2. Add exactly one file: `proposals/<slug>/prompt.md`.
-3. Keep the prompt between 1 and 2,000 characters. Ask for a self-contained visual evolution with no network access.
+3. Keep the prompt between 1 and 2,000 characters. Describe the product outcome, not implementation instructions or requests for credentials and external side effects.
 4. Open a pull request to `staging` using the proposal template.
 
-Do not submit generated HTML in a proposal. A maintainer manually runs the candidate-agent workflow against selected proposal PRs. The workflow gives Codex write access only to the checkout, runs the deterministic boundary validator, asks a second read-only Codex run to classify the diff, and opens a separate candidate PR.
+Do not submit generated code in a proposal. A maintainer manually runs the candidate-agent workflow against selected proposal PRs. An OpenCode agent using a selected OpenRouter model may evolve product code across the monorepo, while deterministic protected-path and size guards keep the GitHub/deployment control plane out of reach. A separate read-only OpenRouter model classifies the complete diff before the workflow opens a candidate PR.
 
 ## Voting and promotion
 

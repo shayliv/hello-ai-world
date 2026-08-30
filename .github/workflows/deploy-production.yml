@@ -38,7 +38,7 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run ledger:check
-      - name: Verify immutable release against the production world
+      - name: Verify immutable release against the complete production product
         env:
           RELEASE_ID: ${{ inputs.release_id }}
         run: |

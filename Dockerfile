@@ -3,13 +3,10 @@ FROM node:24-slim
 ENV NODE_ENV=production
 WORKDIR /app
 
-COPY --chown=node:node package.json package-lock.json server.mjs ./
-RUN npm ci --omit=dev
-COPY --chown=node:node storage ./storage
-COPY --chown=node:node world ./world
-COPY --chown=node:node state ./state
-COPY --chown=node:node cycles ./cycles
-COPY --chown=node:node releases ./releases
+COPY --chown=node:node . .
+RUN npm ci
+RUN npm run build --if-present
+RUN npm prune --omit=dev
 RUN mkdir -p /app/data && chown node:node /app/data
 
 USER node
