@@ -96,7 +96,7 @@ jobs:
           HEAD_SHA: ${{ steps.candidate.outputs.head_sha }}
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --retry 6 --retry-delay 5 "$URL/healthz"
+          curl --fail --silent --show-error --retry 6 --retry-delay 5 "$URL/api/health"
           # shellcheck disable=SC2016
           body=$(printf 'Preview deployed from exact commit `%s`: %s\n\nWorkflow evidence: %s/actions/runs/%s' "$HEAD_SHA" "$URL" "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" "$GITHUB_RUN_ID")
           gh pr comment "$CANDIDATE_PR" --body "$body"

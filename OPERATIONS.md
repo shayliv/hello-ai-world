@@ -45,6 +45,6 @@ Create `releases/epoch-N.json`, update `state/current.json`, render the docs, an
 gh run list --workflow deploy-staging.yml
 gh run list --workflow deploy-production.yml
 gcloud run services list --project bonez-490920 --region europe-west1
-curl -fsS https://hello-ai-world-mhbydmqmqq-ew.a.run.app/healthz
+curl -fsS https://hello-ai-world-mhbydmqmqq-ew.a.run.app/api/health
 curl -fsS https://hello-ai-world-mhbydmqmqq-ew.a.run.app/api/state
 ```

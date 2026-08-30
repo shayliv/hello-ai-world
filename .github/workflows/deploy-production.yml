@@ -64,14 +64,13 @@ jobs:
             NODE_ENV=production
             DATABASE_BACKEND=repository
           env_vars_update_strategy: overwrite
-          secrets: "{}"
-          secrets_update_strategy: overwrite
           labels: |-
             hello-ai-world-kind=production
             hello-ai-world-release=${{ inputs.release_id }}
           flags: >-
             --service-account=${{ vars.GCP_CONTROL_SERVICE_ACCOUNT }}
             --no-invoker-iam-check
+            --clear-secrets
             --min-instances=0
             --max-instances=3
             --memory=512Mi
@@ -82,6 +81,6 @@ jobs:
           RELEASE_ID: ${{ inputs.release_id }}
         run: |
           set -euo pipefail
-          curl --fail --silent --show-error --retry 6 --retry-delay 5 "$URL/healthz"
+          curl --fail --silent --show-error --retry 6 --retry-delay 5 "$URL/api/health"
           curl --fail --silent --show-error "$URL/api/state" | RELEASE_ID="$RELEASE_ID" node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const v=JSON.parse(s);if(v.source!=="repository"||v.currentProduction.releaseId!==process.env.RELEASE_ID)process.exit(1)})'
           echo "Production: $URL" >> "$GITHUB_STEP_SUMMARY"
